@@ -1,23 +1,30 @@
+📄 한국어 문서는 README_KR.md를 참고하세요.
+
+📝 Detailed development notes are available on my blog: https://blog.naver.com/d_soohwan/223847244143
+* Part1: https://blog.naver.com/d_soohwan/223877512044
+* part2: https://blog.naver.com/d_soohwan/223887231185
+
+---
 # Gomoku Minimax AI (Pygame)
 
-Pygame 기반 오목(Gomoku) 게임과 Minimax 기반 AI를 구현한 프로젝트입니다.  
-AI는 제한 깊이까지 게임 트리를 탐색한 뒤, 패턴 기반 휴리스틱 평가 함수로 보드를 점수화하여 최적 수를 선택합니다.
+This project implements a Pygame-based Gomoku game with a Minimax-based AI.  
+The AI explores the game tree up to a limited depth, evaluates the board using a pattern-based heuristic evaluation function, and selects the optimal move.
 
-## Demo / 실행 파일
-- Windows 실행 파일(압축): (https://drive.google.com/file/d/1I_yWgIgpoGSq1WSMB61PAGRVbgc5_sHv/view?usp=sharing)
-- 실행 방법: 압축 해제 후 `gomoku_game.exe` 실행  
-  ※ Windows 외 OS에서는 오류가 발생할 수 있습니다.
+## Demo / Executable
+- Windows executable (ZIP): (https://drive.google.com/file/d/1I_yWgIgpoGSq1WSMB61PAGRVbgc5_sHv/view?usp=sharing)
+- How to run: Extract the archive and run `gomoku_game.exe`  
+  ※ Errors may occur on operating systems other than Windows.
 
 ---
 
 ## Key Features
-- **Pygame GUI**: 마우스 클릭으로 게임 진행
-- **Minimax AI**: 깊이 제한 탐색 + 휴리스틱 평가
-- **Alpha-Beta Pruning**: 불필요한 노드 탐색 제거로 속도 개선
-- **AI 성향 조절**: 공격/수비 가중치(attack/defense weight) 제공
-- **설정 파일 기반 튜닝**: `settings.txt`로 주요 파라미터 저장/로드
-- **패턴 점수 테이블 분리**: `pattern_scores.txt` 기반으로 유지보수 용이
-- 리소스 포함: `images/`, `sounds/`, `fonts/`
+- **Pygame GUI**: Play the game via mouse clicks
+- **Minimax AI**: Depth-limited search with heuristic evaluation
+- **Alpha-Beta Pruning**: Improves performance by eliminating unnecessary node exploration
+- **AI Behavior Tuning**: Adjustable attack/defense weights
+- **Config-based Tuning**: Save/load key parameters via `settings.txt`
+- **Separated Pattern Score Table**: Easy maintenance using `pattern_scores.txt`
+- Included resources: `images/`, `sounds/`, `fonts/`
 
 ---
 
@@ -25,104 +32,100 @@ AI는 제한 깊이까지 게임 트리를 탐색한 뒤, 패턴 기반 휴리�
 - Python
 - Pygame
 
-
 ---
 
 ## How It Works
 
 ### 1) Minimax (Depth-limited)
-- 현재 보드에서 가능한 수들을 생성
-- 각 수를 적용한 새로운 보드로 재귀 탐색
-- **깊이 제한**에 도달하면 휴리스틱으로 보드를 평가해 점수 반환
-- 승패가 확정되면 매우 큰/작은 값(±1,000,000 등)을 반환하여 즉시 의사결정에 반영
+- Generate all possible moves from the current board state
+- Recursively explore new boards created by applying each move
+- When the **depth limit** is reached, evaluate the board using a heuristic function and return a score
+- If a win or loss is determined, return a very large/small value (e.g., ±1,000,000) to immediately influence decision-making
 
-대표 흐름(개념):
-- MAX(AI 턴): 자식 노드 중 최대 점수 선택
-- MIN(상대 턴): 자식 노드 중 최소 점수 선택
+Conceptual flow:
+- MAX (AI turn): Choose the child node with the maximum score
+- MIN (Opponent turn): Choose the child node with the minimum score
 
-### 2) Move Generation: 탐색 공간 축소
-오목은 일반적으로 “기존 돌과 무관한 먼 칸”에 두는 경우가 드뭅니다.  
-따라서 **이미 놓인 돌 주변(search_range 이내)**의 빈 칸만 후보로 삼아 탐색 공간을 줄였습니다.
+### 2) Move Generation: Reducing the Search Space
+In Gomoku, placing a stone in a position far away from existing stones is rarely meaningful.  
+Therefore, the search space is reduced by considering only **empty cells near already placed stones (within `search_range`)**.
 
 - `get_possible_moves(board, search_range=1)`
-- `any_stone_nearby(...)`로 주변 돌 존재 여부를 확인
+- Check for nearby stones using `any_stone_nearby(...)`
 
 ---
 
 ## Heuristic Evaluation (Pattern-based)
-휴리스틱은 “연속된 돌 + 양끝이 열려있는지”를 기준으로 점수를 부여합니다.
+The heuristic assigns scores based on **consecutive stones and whether the ends are open**.
 
-예시(개념):
-- 4목 + 양끝 열림 > 4목 + 한쪽 열림 > 3목 + 양끝 열림 > ...
+Example (conceptual):
+- Open four > four with one blocked end > open three > ...
 
-평가 함수는 다음 원칙으로 구현했습니다.
-- `evaluate_board(board, player)`로 player 관점 점수 계산
-- 최종 평가는 **AI 점수 - 상대 점수** 차이로 결정 (상대의 위협을 반영하기 위함)
+The evaluation function follows these principles:
+- `evaluate_board(board, player)` calculates the score from the given player’s perspective
+- The final evaluation is determined by **AI score - opponent score**, so that opponent threats are taken into account
 
 ---
 
-## Performance Improvements & Iterations (시행착오 기록)
-이 프로젝트는 “Minimax만 구현하면 끝”이 아니라, **속도와 성능을 실제로 끌어올리는 과정**이 핵심이었습니다.
+## Performance Improvements & Iterations (Trial-and-Error Log)
+This project was not just about implementing Minimax, but about **actually improving speed and performance through iteration**.
 
-### (1) 탐색 후보 축소: “주변 수만 탐색”
-초기 구현에서 전체 보드를 후보로 두면 경우의 수가 폭증하여 탐색 시간이 비현실적으로 증가했습니다.  
-이를 해결하기 위해 **기존 돌 주변의 빈칸만 후보로 생성**하도록 변경했습니다.
-- 결과: 탐색 시간이 유의미하게 감소하여 실사용 가능한 속도에 접근
+### (1) Candidate Reduction: “Search Only Nearby Moves”
+In the initial implementation, considering the entire board as candidates caused a combinatorial explosion and unrealistic search times.  
+This was resolved by generating candidates **only from empty cells near existing stones**.
+- Result: Search time was significantly reduced, reaching a practically usable speed
 
-### (2) Alpha-Beta Pruning 도입
-15x15 확장 및 탐색 깊이 조절 기능을 넣으면서, 다시 속도 병목이 발생했습니다.  
-대표 최적화 기법인 **알파-베타 가지치기(alpha-beta pruning)**를 적용해 “어차피 선택되지 않을 노드”의 탐색을 생략했습니다.
-- 결과: 특히 중반 이후 체감 속도 개선
+### (2) Introducing Alpha-Beta Pruning
+After expanding to a 15×15 board and adding adjustable search depth, performance bottlenecks reappeared.  
+By applying **alpha-beta pruning**, exploration of nodes that would never be chosen was skipped.
+- Result: Noticeable speed improvements, especially in the mid-to-late game
 
-### (3) 공격/수비 가중치(attack/defense weight)
-기본 평가는 `AI_score - Opponent_score` 형태인데, 여기서
-- AI 점수에 가중치를 주면 공격적
-- 상대 점수에 가중치를 주면 수비적
-성향 조절이 가능합니다.
+### (3) Attack/Defense Weights
+The base evaluation is `AI_score - Opponent_score`, where:
+- Increasing the weight on the AI score makes the AI more aggressive
+- Increasing the weight on the opponent score makes the AI more defensive
 
-`settings.txt`에서 1~9 범위 값을 받아 0.4~1.6 정도의 가중치로 변환해 적용했습니다.
-- 관찰: **수비적인 세팅이 성능 면에서 더 안정적**이었고,
-  특정 세팅에서 AI vs AI가 무승부에 수렴하는 결과를 확인했습니다.
+Values from 1 to 9 are read from `settings.txt` and mapped to weights roughly in the range of 0.4 to 1.6.
+- Observation: **Defensive settings were more stable in terms of performance**, and in some configurations, AI vs AI games converged toward draws
 
-### (4) possible_moves 정렬로 가지치기 효율 향상
-알파-베타는 “좋은 수를 먼저 볼수록” pruning이 더 많이 발생합니다.  
-이를 위해 후보 수를 **직전 수(previous_move)와의 거리 기준으로 정렬**해,
-가능성이 높은 수를 우선 탐색하도록 개선했습니다.
-- 관찰: 일부 상황에서 탐색 시간이 짧아지는 케이스가 발생
+### (4) Sorting possible_moves to Improve Pruning Efficiency
+Alpha-beta pruning becomes more effective when “good moves are explored first.”  
+To achieve this, candidate moves are **sorted by their distance from the previous move**, prioritizing more promising positions.
+- Observation: In some situations, this noticeably reduced search time
 
-### (5) 필승 패턴(삼삼/위협 복합) 보너스 점수
-게임을 해보면 사람이 만드는 **열린 3-3, 열린3+막힌4** 같은 “막기 어려운 복합 위협”에 AI가 취약한 경우가 있었습니다.  
-단순히 패턴 점수를 더하는 방식만으로는 복합 위협을 충분히 크게 평가하지 못했기 때문입니다.
+### (5) Bonus Scores for Forced-Win Patterns (Double-Three / Combined Threats)
+During gameplay, the AI was sometimes vulnerable to human-created **complex threats** such as open double-threes or open-three + blocked-four combinations.  
+Simple additive pattern scoring was not sufficient to properly value these compound threats.
 
-해결:
-- 패턴 등장 횟수를 `pattern_counter[num][opens]`에 기록
-- 특정 조합이 충족되면 bonus score 추가
-  - 예: 열린 3이 2개 이상(삼삼)
-  - 열린3 + 막힌4 조합
-  - 막힌4 2개 등
+Solution:
+- Track pattern occurrences in `pattern_counter[num][opens]`
+- Add bonus scores when specific combinations are satisfied
+  - Examples: two or more open threes (double-three)
+  - open-three + blocked-four combination
+  - two blocked-fours
 
-- 결과: **복합 위협을 더 일찍 감지하고 방어하는 경향**을 유도
+- Result: The AI tends to **detect and defend against compound threats earlier**
 
 ---
 
 ## Settings
-`settings.txt`를 통해 다음 요소를 조절할 수 있습니다(예시).
-- 탐색 깊이(max depth)
+The following elements can be adjusted via `settings.txt` (examples):
+- Search depth (max depth)
 - search_range
 - attack_weight / defense_weight
-- 기타 UI/게임 옵션
+- Other UI/game options
 
-설정은 게임 내 settings screen에서 +/- 버튼으로 수정하고 파일에 저장되도록 구현했습니다.
+Settings can be modified using +/- buttons in the in-game settings screen and saved to the file.
 
 ---
 
 ## Known Limitations
-- 휴리스틱 기반이므로 일부 상황에서 사람이 보기엔 “비합리적”인 수를 둘 수 있습니다.
-- 완전해법(완전 탐색)이 아닌 깊이 제한 탐색이므로, 깊이를 높이면 속도 비용이 급격히 증가합니다.
-- Windows 외 OS에서는 실행 파일 호환 문제가 있을 수 있습니다.
+- Since the AI is heuristic-based, it may sometimes make moves that appear “irrational” to human players
+- Because the search is depth-limited rather than exhaustive, increasing depth causes a rapid increase in computational cost
+- Executable compatibility issues may occur on operating systems other than Windows
 
 ---
 
 ## Credits
-- 개발: ImSoohwan
-- BGM 생성: MixAudio (https://mix.audio/home)
+- Development: ImSoohwan
+- BGM generation: MixAudio (https://mix.audio/home)
