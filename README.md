@@ -1,8 +1,8 @@
 📄 한국어 문서는 README_KR.md를 참고하세요.
 
-📝 Detailed development notes are available on my blog: https://blog.naver.com/d_soohwan/223847244143
+📝 Detailed development notes are available on my blog: 
 * Part1: https://blog.naver.com/d_soohwan/223877512044
-* part2: https://blog.naver.com/d_soohwan/223887231185
+* Part2: https://blog.naver.com/d_soohwan/223887231185
 
 ---
 # Gomoku Minimax AI (Pygame)
